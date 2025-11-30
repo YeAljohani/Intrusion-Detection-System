@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Attack Detector - Network Intrusion Detector</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#020617;color:#e2e8f0;min-height:100vh;padding:24px}
+.page-shell{max-width:1200px;margin:0 auto}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 180deg,#22d3ee,#3b82f6,#0ea5e9,#22d3ee);position:relative;overflow:hidden}
+.brand-icon::after{content:"";position:absolute;inset:3px;border-radius:9px;background:#020617;box-shadow:0 0 12px rgba(56,189,248,.7) inset}
+.brand-text h1{font-size:22px;letter-spacing:.08em;text-transform:uppercase}
+.brand-text span{display:block;font-size:12px;color:#64748b;letter-spacing:.16em;text-transform:uppercase;margin-top:2px}
+.status-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(22,163,74,.12);border:1px solid rgba(34,197,94,.4);font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#4ade80}
+.status-dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.8)}
+.hero{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;margin-bottom:26px}
+.hero-card{background:#0f172a;border-radius:18px;padding:22px;border:1px solid rgba(148,163,184,.28);position:relative;overflow:hidden}
+.hero-inner{position:relative}
+.hero-heading span{font-size:16px;color:#38bdf8;text-transform:uppercase;letter-spacing:.14em}
+.hero-subtitle{font-size:14px;color:#9ca3af;margin-top:6px;max-width:480px}
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+.metric-card{padding:14px;border-radius:14px;background:#0f172a;border:1px solid #334155}
+.metric-label{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:#64748b;margin-bottom:6px}
+.metric-value{font-size:22px;font-weight:700}
+.metric-sub{font-size:11px;color:#6b7280;margin-top:4px}
+.chart-card{background:#0f172a;border-radius:18px;padding:18px;border:1px solid rgba(148,163,184,.3)}
+.chart-header{margin-bottom:10px}
+.chart-title{font-size:14px;text-transform:uppercase;letter-spacing:.14em;color:#93c5fd}
+.chart-container{height:260px}
+.main-layout{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-bottom:40px}
+.test-card{background:#0f172a;border-radius:18px;padding:20px;border:1px solid rgba(148,163,184,.32)}
+.test-title{font-size:16px;text-transform:uppercase;letter-spacing:.16em;color:#93c5fd;margin-bottom:10px}
+.example-box{background:#1e293b;border-radius:12px;padding:10px;border:1px solid #334155;margin-bottom:10px}
+.example-header{display:flex;justify-content:space-between;margin-bottom:6px}
+.example-code{font-family:monospace;font-size:11px;background:#020617;padding:8px;border-radius:8px;white-space:nowrap;overflow-x:auto;color:#bfdbfe}
+textarea{width:100%;height:130px;background:#020617;color:#e2e8f0;border:1px solid #334155;border-radius:10px;padding:12px;font-size:12px;font-family:monospace}
+button{padding:10px 20px;border:none;border-radius:999px;background:#1d4ed8;color:white;font-size:13px;text-transform:uppercase;letter-spacing:.14em;cursor:pointer}
+button:hover{background:#3b82f6}
+.result-panel{margin-top:14px;border-radius:14px;padding:14px;background:#10231a;border:1px solid #0f5132;display:none}
+.result-panel.danger{background:#2a0f0f;border-color:#7f1d1d}
+.result-title{font-size:13px;text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+.result-value{font-size:16px;font-weight:700}
+.sample-btn{margin-top:14px;padding:10px 20px;background:#1e3a8a;border:1px solid #3b82f6;border-radius:999px;text-transform:uppercase;font-size:12px;cursor:pointer}
+.sample-btn:hover{background:#3b82f6}
+.sample-panel{position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#0f172a;border-left:1px solid #334155;box-shadow:-12px 0 32px rgba(0,0,0,.45);padding:20px;transition:.35s;overflow-y:auto;z-index:2000}
+.sample-panel.open{right:0}
+.sample-panel-header{display:flex;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:16px;font-size:15px;color:#93c5fd;text-transform:uppercase}
+.close-sample-btn{background:none;border:none;color:#64748b;font-size:18px;cursor:pointer}
+.sample-category{margin:10px 0 8px;font-size:13px;text-transform:uppercase;color:#60a5fa}
+.sample-item{background:#1e293b;padding:12px;border-radius:10px;border:1px solid #334155;margin-bottom:10px;font-size:12px;cursor:pointer;transition:.2s}
+.sample-item:hover{border-color:#3b82f6;background:#0f172a}
+.sample-overlay{position:fixed;inset:0;background:rgba(2,6,23,.6);backdrop-filter:blur(2px);opacity:0;visibility:hidden;transition:.2s;z-index:1500}
+.sample-overlay.show{opacity:1;visibility:visible}
+
+</style>
+</head>
+
+<body>
+<div class="page-shell">
+
+<header class="top-bar">
+    <div class="brand">
+        <div class="brand-icon"></div>
+        <div class="brand-text">
+            <h1>Attack Detector</h1>
+            <span>Network Intrusion Console</span>
+        </div>
+    </div>
+    <div class="status-pill"><span class="status-dot"></span>Online</div>
+</header>
+
+<section class="hero">
+    <div class="hero-card">
+        <div class="hero-inner">
+            <div class="hero-heading"><span>Detection Engine</span></div>
+            <p class="hero-subtitle">Binary classifier distinguishing Normal traffic from Attack activity.</p>
+            <div class="metrics-row">
+                <div class="metric-card"><div class="metric-label">Accuracy</div><div class="metric-value">99.90%</div><div class="metric-sub">Overall performance</div></div>
+                <div class="metric-card"><div class="metric-label">Precision</div><div class="metric-value">100%</div><div class="metric-sub">Correct positive detections</div></div>
+                <div class="metric-card"><div class="metric-label">Recall</div><div class="metric-value">100%</div><div class="metric-sub">Attack coverage</div></div>
+                <div class="metric-card"><div class="metric-label">F1 Score</div><div class="metric-value">100%</div><div class="metric-sub">Balanced metric</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">Performance Overview</div>
+        </div>
+        <div class="chart-container"><canvas id="metricsChart"></canvas></div>
+    </div>
+</section>
+
+<section class="main-layout">
+    <div class="chart-card">
+        <div class="chart-header"><div class="chart-title">Traffic Distribution</div></div>
+        <div class="chart-container"><canvas id="distributionChart"></canvas></div>
+    </div>
+
+    <div class="test-card">
+        <div class="test-title">Live Flow Scan</div>
+
+        <div class="example-box">
+            <div class="example-header"><span>Normal Sample</span></div>
+            <div class="example-code">0,tcp,http,SF,215,45076,...</div>
+        </div>
+
+        <div class="example-box">
+            <div class="example-header"><span>Attack Sample</span></div>
+            <div class="example-code">0,tcp,private,S0,0,0,...</div>
+        </div>
+
+        <button id="openSamplesBtn" class="sample-btn">Show Sample Data</button>
+
+        <textarea id="features" placeholder="Paste or choose sample..."></textarea>
+
+        <button id="analyzeBtn">Analyze Flow</button>
+
+        <div id="result" class="result-panel">
+            <div class="result-title">Result</div>
+            <div id="resultPrediction" class="result-value"></div>
+            <div id="resultConfidence" class="result-value"></div>
+        </div>
+    </div>
+</section>
+
+<div id="samplePanel" class="sample-panel">
+    <div class="sample-panel-header">
+        <span>Sample Data</span>
+        <button id="closeSamplesBtn" class="close-sample-btn">✕</button>
+    </div>
+    <h4 class="sample-category">Normal Samples</h4>
+    <div id="normalSamples"></div>
+    <h4 class="sample-category">Attack Samples</h4>
+    <div id="attackSamples"></div>
+</div>
+
+<div id="sampleOverlay" class="sample-overlay"></div>
+
+</div>
+
+<script>
+
+//////////////////////////////////////////////////////////////////
+// INSERTED ARRAYS — AS YOU REQUESTED (NO OTHER CHANGES MADE)
+//////////////////////////////////////////////////////////////////
+
+const normalSamplesArr = [
+  ["2","tcp","ftp_data","SF","12983","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","1","1","0.0","0.0","0.0","0.0","1.0","0.0","0.0","134","86","0.61","0.04","0.61","0.02","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","267","14515","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","4","4","0.0","0.0","0.0","0.0","1.0","0.0","0.0","155","255","1.0","0.0","0.01","0.03","0.01","0.0","0.0","0.0"],
+  ["0","tcp","smtp","SF","1022","387","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","1","3","0.0","0.0","0.0","0.0","1.0","0.0","1.0","255","28","0.11","0.72","0.0","0.0","0.0","0.0","0.72","0.04"],
+  ["0","tcp","http","SF","327","467","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","33","47","0.0","0.0","0.0","0.0","1.0","0.0","0.04","151","255","1.0","0.0","0.01","0.03","0.0","0.0","0.0","0.0"],
+  ["0","tcp","smtp","SF","616","330","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","1","2","0.0","0.0","0.0","0.0","1.0","0.0","1.0","255","129","0.51","0.03","0.0","0.0","0.0","0.0","0.33","0.0"],
+  ["37","tcp","telnet","SF","773","364200","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","1","1","0.0","0.0","0.0","0.0","1.0","0.0","0.0","38","73","0.16","0.05","0.03","0.04","0.0","0.77","0.0","0.07"],
+  ["0","tcp","http","SF","350","3610","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","8","8","0.0","0.0","0.0","0.0","1.0","0.0","0.0","71","255","1.0","0.0","0.01","0.04","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","213","659","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","24","24","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","255","1.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","246","2090","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","16","16","0.0","0.0","0.0","0.0","1.0","0.0","0.0","35","255","1.0","0.0","0.03","0.05","0.0","0.0","0.0","0.0"],
+  ["0","udp","private","SF","45","44","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","505","505","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","255","1.0","0.0","1.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","196","1823","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","17","17","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","255","1.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","277","1816","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","17","18","0.0","0.0","0.0","0.0","1.0","0.0","0.11","36","255","1.0","0.0","0.03","0.02","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","294","6442","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","22","46","0.0","0.0","0.0","0.0","1.0","0.0","0.11","180","255","1.0","0.0","0.01","0.01","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","300","440","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","7","7","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","255","1.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","udp","private","SF","54","51","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","511","511","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","255","1.0","0.0","0.83","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","smtp","SF","720","281","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","1","2","0.0","0.0","0.0","0.0","1.0","0.0","1.0","158","82","0.52","0.06","0.01","0.0","0.01","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","301","19794","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","15","15","0.0","0.0","0.0","0.0","1.0","0.0","0.0","20","255","1.0","0.0","0.05","0.02","0.05","0.0","0.0","0.0"],
+  ["0","udp","private","SF","1","1","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","40","3","0.0","0.0","0.0","0.0","0.08","0.38","0.0","255","3","0.01","0.58","0.99","0.0","0.0","0.0","0.01","0.0"],
+  ["0","tcp","http","SF","209","12894","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","11","11","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","255","1.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","udp","domain_u","SF","43","71","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","113","113","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","254","1.0","0.01","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","ftp_data","SF","88382","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","15","15","0.0","0.0","0.0","0.0","1.0","0.0","0.0","203","114","0.38","0.01","0.38","0.02","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","277","4968","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","13","13","0.0","0.0","0.0","0.0","1.0","0.0","0.0","13","255","1.0","0.0","0.08","0.01","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","321","2715","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","29","37","0.03","0.05","0.0","0.0","1.0","0.0","0.08","29","255","1.0","0.0","0.03","0.04","0.03","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","335","3228","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","49","50","0.0","0.0","0.0","0.0","1.0","0.0","0.04","255","255","1.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","234","3236","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","8","21","0.0","0.0","0.0","0.0","1.0","0.0","0.1","255","255","1.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","udp","private","SF","46","45","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","68","68","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","255","1.0","0.0","0.26","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","318","488","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","3","16","0.0","0.0","0.0","0.0","1.0","0.0","0.12","3","156","1.0","0.0","0.33","0.04","0.0","0.01","0.0","0.0"],
+  ["0","tcp","http","SF","256","4926","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","1","41","0.0","0.0","0.0","0.0","1.0","0.0","0.07","255","241","0.95","0.02","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","229","509","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","1","1","0.0","0.0","0.0","0.0","1.0","0.0","0.0","21","255","1.0","0.0","0.05","0.04","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","282","396","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","8","8","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","255","1.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","233","2239","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","3","3","0.0","0.0","0.0","0.0","1.0","0.0","0.0","255","197","0.77","0.02","0.0","0.0","0.0","0.0","0.0","0.0"],
+  ["0","tcp","http","SF","257","8712","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","2","20","0.0","0.0","0.0","0.0","1.0","0.0","0.2","255","255","1.0","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],
+];
+
+const attackSamplesArr = [
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","229","10","0.0","0.0","1.0","1.0","0.04","0.06","0.0","255","10","0.04","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","136","1","0.0","0.0","1.0","1.0","0.01","0.06","0.0","255","1","0.0","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","111","2","0.0","0.0","1.0","1.0","0.02","0.07","0.0","255","2","0.01","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","telnet","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","120","120","1.0","1.0","0.0","0.0","1.0","0.0","0.0","235","171","0.73","0.07","0.0","0.0","0.69","0.95","0.02","0.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","204","18","0.0","0.0","1.0","1.0","0.09","0.07","0.0","255","18","0.07","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","ldap","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","118","19","0.0","0.0","1.0","1.0","0.16","0.05","0.0","255","19","0.07","0.05","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","courier","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","116","8","0.0","0.0","1.0","1.0","0.07","0.07","0.0","255","8","0.03","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","discard","RSTO","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","273","13","0.0","0.0","1.0","1.0","0.05","0.06","0.0","255","13","0.05","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","144","8","1.0","1.0","0.0","0.0","0.06","0.06","0.0","255","8","0.03","0.06","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","mtp","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","266","8","0.0","0.0","1.0","1.0","0.03","0.06","0.0","255","8","0.03","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","systat","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","281","6","1.0","1.0","0.0","0.0","0.02","0.06","0.0","255","6","0.02","0.07","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","iso_tsap","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","239","7","0.0","0.0","1.0","1.0","0.03","0.06","0.0","255","7","0.03","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","201","3","0.0","0.0","1.0","1.0","0.01","0.08","0.0","255","3","0.01","0.08","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","imap4","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","280","8","0.0","0.0","1.0","1.0","0.03","0.06","0.0","255","8","0.03","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","109","13","0.0","0.0","1.0","1.0","0.12","0.06","0.0","255","13","0.05","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","smtp","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","114","1","1.0","1.0","0.0","0.0","0.01","0.06","0.0","255","1","0.0","0.05","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","216","14","0.0","0.0","1.0","1.0","0.06","0.06","0.0","255","14","0.05","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","csnet_ns","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","251","3","0.0","0.0","1.0","1.0","0.01","0.06","0.0","255","3","0.01","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","267","19","0.01","0.0","0.99","1.0","0.07","0.06","0.0","255","19","0.07","0.06","0.0","0.0","0.01","0.0","0.99","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","231","6","0.0","0.0","1.0","1.0","0.03","0.07","0.0","255","6","0.02","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","finger","RSTO","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","58","19","0.0","0.0","1.0","1.0","0.33","0.07","0.0","255","62","0.24","0.11","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","103","4","0.0","0.0","1.0","1.0","0.04","0.06","0.0","255","4","0.02","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","uucp","RSTO","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","119","7","0.0","0.0","1.0","1.0","0.06","0.07","0.0","255","7","0.03","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","217","6","0.0","0.0","1.0","1.0","0.03","0.07","0.0","255","6","0.02","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","106","15","0.0","0.0","1.0","1.0","0.14","0.08","0.0","255","15","0.06","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","239","12","0.0","0.0","1.0","1.0","0.05","0.07","0.0","255","12","0.05","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","117","10","0.0","0.0","1.0","1.0","0.09","0.06","0.0","255","10","0.04","0.05","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","228","15","0.0","0.0","1.0","1.0","0.07","0.07","0.0","255","15","0.06","0.08","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","259","20","1.0","1.0","0.0","0.0","0.08","0.07","0.0","255","20","0.08","0.07","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","whois","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","282","17","0.0","0.0","1.0","1.0","0.06","0.06","0.0","255","17","0.07","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","132","12","0.0","0.0","1.0","1.0","0.09","0.05","0.0","255","12","0.05","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","226","2","0.03","0.0","0.97","1.0","0.01","0.07","0.0","255","2","0.01","0.08","0.0","0.0","0.02","0.0","0.98","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","218","19","0.0","0.0","1.0","1.0","0.09","0.06","0.0","255","19","0.07","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","131","5","0.0","0.0","1.0","1.0","0.04","0.06","0.0","255","5","0.02","0.05","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","269","7","0.0","0.0","1.0","1.0","0.03","0.07","0.0","255","7","0.03","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","109","5","0.0","0.0","1.0","1.0","0.05","0.06","0.0","255","5","0.02","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","private","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","200","8","1.0","1.0","0.0","0.0","0.04","0.06","0.0","255","8","0.03","0.07","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","267","11","0.0","0.0","1.0","1.0","0.04","0.06","0.0","255","11","0.04","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","mtp","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","286","18","0.0","0.0","1.0","1.0","0.06","0.06","0.0","255","18","0.07","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","netbios_ns","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","179","19","1.0","1.0","0.0","0.0","0.11","0.08","0.0","255","19","0.07","0.08","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","private","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","203","14","1.0","1.0","0.0","0.0","0.07","0.06","0.0","255","14","0.05","0.07","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","273","3","0.0","0.0","1.0","1.0","0.01","0.06","0.0","255","3","0.01","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","systat","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","239","20","1.0","1.0","0.0","0.0","0.08","0.07","0.0","255","20","0.08","0.08","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","private","RSTO","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","198","1","0.0","0.0","1.0","1.0","0.01","0.07","0.0","255","1","0.0","0.07","0.0","0.0","0.0","0.0","1.0","1.0"],
+  ["0","tcp","imap4","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","110","9","1.0","1.0","0.0","0.0","0.08","0.07","0.0","255","9","0.04","0.06","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","private","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","216","7","1.0","1.0","0.0","0.0","0.03","0.06","0.0","255","7","0.03","0.07","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","private","S0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","158","5","1.0","1.0","0.0","0.0","0.03","0.11","0.0","255","5","0.02","0.1","0.0","0.0","1.0","1.0","0.0","0.0"],
+  ["0","tcp","private","REJ","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","242","2","0.0","0.0","1.0","1.0","0.01","0.07","0.0","255","2","0.01","0.06","0.0","0.0","0.0","0.0","1.0","1.0"],
+];
+
+//////////////////////////////////////////////////////////////////
+// REST OF YOUR ORIGINAL JS CODE — NOT MODIFIED
+//////////////////////////////////////////////////////////////////
+
+function buildSampleList(){
+document.getElementById("normalSamples").innerHTML="";
+document.getElementById("attackSamples").innerHTML="";
+normalSamplesArr.forEach((s,i)=>{
+let d=document.createElement("div");
+d.className="sample-item";
+d.innerHTML=`<small>Normal Sample #${i+1}</small>${s.slice(0,60)}...`;
+d.onclick=()=>{document.getElementById("features").value=s;closePanel()};
+document.getElementById("normalSamples").appendChild(d);
+});
+attackSamplesArr.forEach((s,i)=>{
+let d=document.createElement("div");
+d.className="sample-item";
+d.innerHTML=`<small>Attack Sample #${i+1}</small>${s.slice(0,60)}...`;
+d.onclick=()=>{document.getElementById("features").value=s;closePanel()};
+document.getElementById("attackSamples").appendChild(d);
+});
+}
+
+function openPanel(){
+document.getElementById("samplePanel").classList.add("open");
+document.getElementById("sampleOverlay").classList.add("show");
+}
+function closePanel(){
+document.getElementById("samplePanel").classList.remove("open");
+document.getElementById("sampleOverlay").classList.remove("show");
+}
+
+document.getElementById("openSamplesBtn").onclick=()=>{
+buildSampleList();
+openPanel();
+};
+document.getElementById("closeSamplesBtn").onclick=closePanel;
+document.getElementById("sampleOverlay").onclick=closePanel;
+
+document.getElementById("analyzeBtn").onclick=async()=>{
+const f=document.getElementById("features").value.trim();
+if(!f)return;
+if(f.split(",").length!==41)return;
+const r=document.getElementById("result");
+r.style.display="none";
+try{
+const res=await fetch("/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({features:f.split(",")})});
+const j=await res.json();
+r.style.display="block";
+document.getElementById("resultPrediction").textContent="Prediction: "+j.prediction.toUpperCase();
+document.getElementById("resultConfidence").textContent="Confidence: "+j.confidence+"%";
+if(j.prediction!=="normal")r.classList.add("danger");else r.classList.remove("danger");
+}catch(e){console.log(e)}
+};
+
+new Chart(document.getElementById("metricsChart").getContext("2d"),{
+type:"bar",
+data:{labels:["Accuracy","Precision","Recall","F1"],datasets:[
+{label:"Normal",data:[100,100,100,100],backgroundColor:"rgba(34,197,94,.8)"},
+{label:"Attack",data:[100,100,100,100],backgroundColor:"rgba(248,113,113,.8)"}
+]},
+options:{responsive:true,plugins:{legend:{labels:{color:"#e5e7eb"}}},scales:{x:{ticks:{color:"#e5e7eb"}},y:{ticks:{color:"#e5e7eb"},beginAtZero:true,max:100}}}
+});
+
+new Chart(document.getElementById("distributionChart").getContext("2d"),{
+type:"doughnut",
+data:{labels:["Normal (9711)","Attack (4657)"],datasets:[
+{data:[9711,4657],backgroundColor:["rgba(34,197,94,.8)","rgba(248,113,113,.8)"]}
+]},
+options:{plugins:{legend:{labels:{color:"#e5e7eb"}}},cutout:"65%"}
+});
+</script>
+
+</body>
+</html>
