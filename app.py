@@ -6,9 +6,9 @@ import pandas as pd
 app = Flask(__name__)
 CORS(app)
 
-print("🔄 Loading model...")
+print(" Loading model...")
 model = joblib.load("nslkdd_sklearn_model.joblib")
-print("✅ Model loaded successfully!")
+print("Model loaded successfully!")
 
 # Feature names (41 features - without label)
 feature_names = [
@@ -77,5 +77,5 @@ def health():
     })
 
 if __name__ == "__main__":
-    print("🚀 Server running at http://127.0.0.1:8000")
+    print(" Server running at http://127.0.0.1:8000")
     app.run(debug=True, host='0.0.0.0', port=8000)

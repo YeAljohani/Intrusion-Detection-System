@@ -1,4 +1,3 @@
-
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
@@ -6,6 +5,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 import requests
 from io import StringIO
+import joblib
+
+
+
+
 
 
 url_train = "https://raw.githubusercontent.com/defcom17/NSL_KDD/master/KDDTrain+.txt"
@@ -61,10 +65,10 @@ rf.fit(X_train, y_train)
 
 y_pred = rf.predict(X_test)
 
-print(f"✅ Accuracy: {accuracy_score(y_test, y_pred)*100:.2f}%\n")
+print(f" Accuracy: {accuracy_score(y_test, y_pred)*100:.2f}%\n")
 print(classification_report(y_test, y_pred, target_names=['normal','neptune']))
 
-import joblib
+
 joblib.dump(rf, "rf_neptune_normal_model.pkl")
 print("Model saved as rf_neptune_normal_model.pkl")
 joblib.dump(le_dict, "label_encoders.pkl")
