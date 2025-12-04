@@ -33,14 +33,21 @@ API
 <img width="1470" height="956" alt="Screenshot 1447-06-13 at 5 08 57 AM" src="https://github.com/user-attachments/assets/25aa64ae-3949-4b1b-b205-fb66fe578f0b" />
 
 
-📁 Training & Experimentation Notebook
-The training/ directory contains all experimental work performed during model development:
-Data cleaning & preprocessing steps
-Exploratory Data Analysis (EDA)
-Label encoding trials
-Multiple model experiments (Random Forest, AutoML, XGBoost, etc.)
-Performance comparison (Normal vs Attack → Normal vs Neptune)
-Final model selection and evaluation
-The full workflow is documented in the Jupyter notebook:
+## Training & Experimentation Notebook
+
+The `training/` directory contains all experimental work performed during the model development process, including:
+
+- Data cleaning and preprocessing steps  
+- Exploratory Data Analysis (EDA)  
+- Label encoding trials  
+- Multiple model experiments (Random Forest, AutoML, XGBoost, etc.)  
+- Performance comparison (Normal vs Attack → Normal vs Neptune)  
+- Final model selection and evaluation  
+
+The full workflow is documented in the notebook:
 training/IDS_model_experiments.ipynb
-This file shows every attempt, decision, and result that led to the final deployed model used in the API.
+
+
+This notebook shows every attempt, decision, and result that led to the final deployed model used in the API.
+
+
