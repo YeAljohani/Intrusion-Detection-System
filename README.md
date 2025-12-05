@@ -40,7 +40,7 @@ The `training/` directory contains all experimental work performed during the mo
 - Data cleaning and preprocessing steps  
 - Exploratory Data Analysis (EDA)  
 - Label encoding trials  
-- Multiple model experiments (Random Forest, AutoML, XGBoost, etc.)  
+- Multiple model experiments (Random Forest, AutoML, XGBoost, )  
 - Performance comparison (Normal vs Attack → Normal vs Neptune)  
 - Final model selection and evaluation  
 
